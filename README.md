@@ -31,3 +31,4 @@ docker-compose exec app jupyter notebook --allow-root --ip=0.0.0.0
 [I 06:19:02.535 NotebookApp] 302 GET /?token=fac9ad381cee6d6c2b71686d46d78713e84ac224a1069249 (172.19.0.1) 1.380000ms
 ```
 
+![FireShot Capture 003 - Home Page - Select or create a notebook - 127 0 0 1](https://user-images.githubusercontent.com/49770211/165177366-5a844b95-ac60-4609-b51f-147ac4056239.png)
