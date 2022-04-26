@@ -196,16 +196,8 @@ str.rfind
 ## IPython Magicコマンド
 
 IPython Magicコマンドとは、IPythonが追加した拡張のこと。
+プロファイリングに使えるコマンドは後述。
 
-インタープリタのプロンプトに複数行のコードブロックをペーストすると予期しないエラーが出る。
-その場合は%pasteコマンドを使う。
-
-コードの実行時間計測には%timeitを使う。
-
-```bash
-In [3]: %timeit l = [n ** 2 for n in range(1000)]
-224 µs ± 7.63 µs per loop (mean ± std. dev. of 7 runs, 1,000 loops each)
-```
 ## InオブジェクトとOutオブジェクト
 
 IPythonでは、入出力の度にIn、Out変数を作成し、参照できるようになっている。
@@ -356,4 +348,59 @@ ZeroDivisionError: division by zero
       3 
       4 
       5 def func2(x):
+```
+
+デバッグコマンド
+
+- q(uit)
+  - デバッガとプログラムの実行を終了する
+- c(ontinue)
+  - デバッガを修了し、プログラムの実行を継続する
+- n(ext)
+  - プログラムの次のステップへ移動する
+- <enter>
+  - 直前のコマンドを繰り返して実行する
+- p(rint)
+  - 変数の値を表示する
+
+## コードのプロファイリングと実行時間計測
+
+IPythonには、コードの実行時間の確認とプロファイリングのための機能が備わっている。
+
+- %time
+  - 実行時間を測定する
+- %timeit
+  - 複数回実行して、より正確な実行時間を測定する
+- %prun
+  - プロファイラと共に実行する
+- %lprun
+  - 行プロファイラと共に実行する
+- %memit
+  - 使用したメモリを測定する
+- %mprun
+  - 行メモリプロファイラを使って使用したメモリを測定する
+
+実行時間の測定の例。
+
+```bash
+In [6]: %time print('test')
+test
+CPU times: user 0 ns, sys: 134 µs, total: 134 µs
+Wall time: 141 µs
+```
+
+プロファイラと共に実行する例。
+
+```bash
+In [5]: %prun print('test')
+test
+         4 function calls in 0.000 seconds
+
+   Ordered by: internal time
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.000    0.000 {built-in method builtins.print}
+        1    0.000    0.000    0.000    0.000 {built-in method builtins.exec}
+        1    0.000    0.000    0.000    0.000 <string>:1(<module>)
+        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
 ```
