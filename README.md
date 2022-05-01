@@ -32,3 +32,14 @@ docker-compose exec app jupyter notebook --allow-root --ip=0.0.0.0
 ```
 
 ![FireShot Capture 003 - Home Page - Select or create a notebook - 127 0 0 1](https://user-images.githubusercontent.com/49770211/165177366-5a844b95-ac60-4609-b51f-147ac4056239.png)
+
+## iPython
+
+iPythonでセル内で改行する場合は、Ctrl+O, Ctrl+J。
+
+```bash
+In [1]: import numpy as np
+   ...: theta = np.linspace(0, np.pi, 3)
+   ...: print("theta: ", theta)
+theta:  [0.         1.57079633 3.14159265]
+```
