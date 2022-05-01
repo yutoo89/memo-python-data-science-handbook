@@ -230,3 +230,245 @@ Out[44]: array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=int16)
   - O
   - Pythonオブジェクト型
 
+## NumPy配列の属性
+
+```bash
+In [2]: import numpy as np
+In [3]: np.random.seed(0)
+
+# 1次元配列
+In [6]: x1 = np.random.randint(10, size=6)
+
+# 2次元配列
+In [7]: x2 = np.random.randint(10, size=(3,4))
+
+# 3次元配列
+In [8]: x3 = np.random.randint(10, size=(3,4,5))
+
+# ndim: 次元数
+In [10]: print("x3 ndim: ", x3.ndim)
+x3 ndim:  3
+
+# shape: 各次元のサイズ
+In [11]: print("x3 shape: ", x3.shape)
+x3 shape:  (3, 4, 5)
+
+# size: 配列の合計サイズ
+In [12]: print("x3 size: ", x3.size)
+x3 size:  60
+```
+
+配列のサイズをバイト数で取得することもできる。
+
+```bash
+# 各要素のバイト数
+In [13]: print("itemsize: ", x3.itemsize)
+itemsize:  8
+
+# 配列の合計サイズ
+In [14]: print("nbytes: ", x3.nbytes)
+nbytes:  480
+```
+
+## 配列要素にアクセスする
+
+```bash
+In [8]: x1
+Out[8]: array([5, 0, 3, 3, 7, 9])
+
+# 角カッコにインデックスを指定してアクセスする
+In [9]: x1[0]
+Out[9]: 5
+
+# 負の数を指定すると配列の最後から数える
+In [10]: x1[-1]
+Out[10]: 9
+
+In [12]: x2
+Out[12]: 
+array([[3, 5, 2, 4],
+       [7, 6, 8, 8],
+       [1, 6, 7, 7]])
+
+# 2次元配列はカンマ区切りでインデックスを指定する
+In [13]: x2[0, 0]
+Out[13]: 3
+
+# 行・列ともに0から始まるので注意
+In [16]: x2[1, 2]
+Out[16]: 8
+```
+
+このインデックス表記で配列要素の変更もできる。
+
+```bash
+In [17]: x2[1, 2] = 99
+
+In [18]: x2
+Out[18]: 
+array([[ 3,  5,  2,  4],
+       [ 7,  6, 99,  8],
+       [ 1,  6,  7,  7]])
+```
+
+2次元配列の行を取り出す場合は下記。
+
+```bash
+In [19]: x2[1]
+Out[19]: array([ 7,  6, 99,  8])
+```
+
+NumPy配列は固定型なので、整数配列に浮動小数点を入れると勝手に小数点以下が切り捨てられる。
+
+```bash
+In [22]: x1
+Out[22]: array([8, 1, 5, 9, 8, 9])
+
+In [23]: x1[0] = 3.14
+
+In [24]: x1
+Out[24]: array([3, 1, 5, 9, 8, 9])
+```
+
+## 配列のスライス
+
+NumPyのスライス構文は、標準のPythonリストの構文に従う。
+
+```py
+x[start:stop:step]
+```
+
+```bash
+In [1]: import numpy as np
+In [2]: x = np.arange(10)
+In [3]: x
+Out[3]: array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+# インデックス5以降
+In [4]: x[5:]
+Out[4]: array([5, 6, 7, 8, 9])
+
+# 最初の5要素
+In [5]: x[:5]
+Out[5]: array([0, 1, 2, 3, 4])
+
+# ステップ3を指定
+In [7]: x[0:9:3]
+Out[7]: array([0, 3, 6])
+
+# ステップを負の値にすると降順になる
+In [8]: x[::-1]
+Out[8]: array([9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+```
+
+## ユニバーサル関数
+
+Pythonのデフォルト実装では、動的に型を解釈するという言語の性質のため、ループ処理が低速。
+
+```py
+import numpy as np
+np.random.seed(0)
+​
+def compute_reciprocals(valus):
+    output = np.empty(len(values))
+    for i in range(len(values)):
+        output[i] = 1.0 / values[i]
+    return output
+​
+values = np.random.randint(1, 10, size=5)
+compute_reciprocals(values)
+# array([0.16666667, 1.        , 0.25      , 0.25      , 0.125     ])
+
+big_array = np.random.randint(1, 100, size=1000000)
+%timeit compute_reciprocals(big_array)
+# 10.9 µs ± 192 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
+```
+
+上記は、操作そのものではなく、ループの各サイクルでPythonが行う型チェックと関数の呼び出しに時間がかかる。
+コンパイルされたコードであれば、コードの実行前に型が判明しているため、効率的に計算することができる。
+
+NumPyのufunc(ユニバーサル関数)は、Pythonのネイティブ算術演算子を使用する。
+
+```bash
+In [3]: import numpy as np
+   ...: x = np.arange(5)
+
+In [4]: print(x)
+[0 1 2 3 4]
+In [5]: print(x + 5)
+[5 6 7 8 9]
+In [6]: print(x - 5)
+[-5 -4 -3 -2 -1]
+In [7]: print(x * 2)
+[0 2 4 6 8]
+In [8]: print(x / 2)
+[0.  0.5 1.  1.5 2. ]
+
+# 整数除算
+In [9]: print(x // 2)
+[0 0 1 1 2]
+
+# べき乗
+In [10]: print(x ** 2)
+[ 0  1  4  9 16]
+```
+
+上記は、NumPyに組み込まれた特定の関数へのラッパー。
+たとえば+演算子はadd関数のラッパー。
+
+```bash
+In [11]: np.add(x, 2)
+Out[11]: array([2, 3, 4, 5, 6])
+```
+
+絶対値を取得する。
+
+```bash
+In [2]: abs(x)
+Out[2]: array([2, 1, 0, 1, 2])
+
+In [3]: np.abs(x)
+Out[3]: array([2, 1, 0, 1, 2])
+```
+
+三角関数を計算する。
+
+```
+In [1]: import numpy as np
+   ...: theta = np.linspace(0, np.pi, 3)
+   ...: print("theta: ", theta)
+theta:  [0.         1.57079633 3.14159265]
+
+In [2]: print("sin(theta): ", np.sin(theta))
+sin(theta):  [0.0000000e+00 1.0000000e+00 1.2246468e-16]
+
+In [3]: print("cos(theta): ", np.cos(theta))
+cos(theta):  [ 1.000000e+00  6.123234e-17 -1.000000e+00]
+
+In [4]: print("tan(theta): ", np.tan(theta))
+tan(theta):  [ 0.00000000e+00  1.63312394e+16 -1.22464680e-16]
+```
+
+指数関数と対数関数。
+
+指数とは、数学におけるexponentの訳。その数がaのn乗で表されるときのnのこと。
+
+
+```bash
+In [1]: import numpy as np
+In [2]: x = [1, 2, 3, 4]
+
+# e^x
+In [3]: print(np.exp(x))
+[ 2.71828183  7.3890561  20.08553692 54.59815003]
+
+# 2^x
+In [4]: print(np.exp2(x))
+[ 2.  4.  8. 16.]
+
+# 3^x
+In [5]: print(np.power(3, x))
+[ 3  9 27 81]
+```
+
+
