@@ -1,6 +1,11 @@
 import MySQLdb
 from sshtunnel import SSHTunnelForwarder
-from .mysql_config import MysqlConfig
+
+import sys, os
+
+dirname = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(dirname)
+from mysql_config import MysqlConfig
 
 
 class MysqlManager:
@@ -57,12 +62,3 @@ class MysqlManager:
         # SSHポート転送終了
         self.close_server()
         return result
-
-
-mysql = MysqlManager()
-
-# <class 'tuple'>
-rows = mysql.query("SELECT name FROM pass_sites;")
-
-for row in rows:
-    print(row)
