@@ -691,3 +691,156 @@ year visit
 2014 1      31.0  38.1  35.0  36.4  13.0  38.5
      2      28.0  38.2  59.0  37.8  53.0  38.3
 ```
+
+## ビニング
+
+まずはテストデータの用意。
+id,priceカラムをもつcsvファイルを読み込む。
+
+```py
+import numpy as np
+import pandas as pd
+
+df = pd.read_csv('/root/src/database/datapoints.csv')
+
+In [4]: df
+Out[4]: 
+    id  price
+0    1    800
+1    2   1000
+2    3   1000
+3    4   1000
+4    5   4000
+..  ..    ...
+64  65   3000
+65  66   3000
+66  67   3000
+67  68   3000
+68  69    111
+
+[69 rows x 2 columns]
+```
+
+[pandasのcut, qcut関数でビニング処理（ビン分割}](https://note.nkmk.me/python-pandas-cut-qcut-binning/)
+pandasには、ビニング処理を行うための関数が2つ用意されている。
+
+- 値をもとにビン分割: cut()
+- 量をもとにビン分割: qcut()
+
+```py
+# 任意の幅でビン分割
+# (2000, 5000]は、2000 < price <= 5000を意味する
+pd.cut(df.price, [0, 500, 1000, 2000, 5000, 10000, 99999999999])
+# Out[12]: 
+# 0      (500, 1000]
+# 1      (500, 1000]
+# 2      (500, 1000]
+# 3      (500, 1000]
+# 4     (2000, 5000]
+#           ...     
+# 64    (2000, 5000]
+# 65    (2000, 5000]
+# 66    (2000, 5000]
+# 67    (2000, 5000]
+# 68        (0, 500]
+# Name: price, Length: 69, dtype: category
+# Categories (6, interval[int64, right]): [(0, 500] < (500, 1000] < (1000, 2000] < (2000, 5000] <
+#                                          (5000, 10000] < (10000, 99999999999]]
+
+# ビンに含まれる要素数が均等になるように3つに分割
+pd.qcut(df.price, 3)
+# テストデータのprice最小値は100
+# Out[14]: 
+# 0      (99.999, 1000.0]
+# 1      (99.999, 1000.0]
+# 2      (99.999, 1000.0]
+# 3      (99.999, 1000.0]
+# 4     (3000.0, 21000.0]
+#             ...        
+# 64     (1000.0, 3000.0]
+# 65     (1000.0, 3000.0]
+# 66     (1000.0, 3000.0]
+# 67     (1000.0, 3000.0]
+# 68     (99.999, 1000.0]
+# Name: price, Length: 69, dtype: category
+# Categories (3, interval[float64, right]): [(99.999, 1000.0] < (1000.0, 3000.0] < (3000.0, 21000.0]]
+```
+
+ビンに名前（ラベル）をつけることもできる。
+
+```py
+In [19]: pd.qcut(df.price, 3, labels=False)
+Out[19]: 
+0     0
+1     0
+2     0
+3     0
+4     2
+     ..
+64    1
+65    1
+66    1
+67    1
+68    0
+Name: price, Length: 69, dtype: int64
+
+In [20]: pd.qcut(df.price, 3, labels=['range1', 'range2', 'range3'])
+Out[20]: 
+0     range1
+1     range1
+2     range1
+3     range1
+4     range3
+       ...  
+64    range2
+65    range2
+66    range2
+67    range2
+68    range1
+Name: price, Length: 69, dtype: category
+Categories (3, object): ['range1' < 'range2' < 'range3']
+```
+
+ビン分割した結果をもとのDataFrameの列として追加する。
+
+```py
+bins = pd.qcut(df.price, 3, labels=['range1', 'range2', 'range3'])
+merged = df.assign(price_category=bins)
+Out[22]: 
+    id  price price_category
+0    1    800         range1
+1    2   1000         range1
+2    3   1000         range1
+3    4   1000         range1
+4    5   4000         range3
+..  ..    ...            ...
+64  65   3000         range2
+65  66   3000         range2
+66  67   3000         range2
+67  68   3000         range2
+68  69    111         range1
+
+[69 rows x 3 columns]
+```
+
+さらに、どのビンに入るかを示すラベルをカテゴリ特徴量とみなし、ホットエンコーディングに変換する。
+DataFrameをホットエンコーディングに変換する場合はget_dummiesメソッドが便利。
+
+```py
+pd.get_dummies(merged, columns=['price_category'])
+Out[25]: 
+    id  price  price_category_range1  price_category_range2  price_category_range3
+0    1    800                      1                      0                      0
+1    2   1000                      1                      0                      0
+2    3   1000                      1                      0                      0
+3    4   1000                      1                      0                      0
+4    5   4000                      0                      0                      1
+..  ..    ...                    ...                    ...                    ...
+64  65   3000                      0                      1                      0
+65  66   3000                      0                      1                      0
+66  67   3000                      0                      1                      0
+67  68   3000                      0                      1                      0
+68  69    111                      1                      0                      0
+
+[69 rows x 5 columns
+```
